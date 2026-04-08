@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "639837271318",
+    "project_id": "resala-65331",
+    "storage_bucket": "resala-65331.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:639837271318:android:bc2a7e046eedeb85cd8c37",
+        "android_client_info": {
+          "package_name": "com.example.resala"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHltzl_9MlD1VfQLQIsz-CoaCJz_Q8wxs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
