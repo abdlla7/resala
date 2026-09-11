@@ -2,7 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../l10n/app_localizations.dart';
+import '../constants/app_strings.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -11,7 +11,6 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Determine screen height for layout
     final size = MediaQuery.of(context).size;
-    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: Stack(
@@ -72,7 +71,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    l10n.volunteerHub,
+                    AppStrings.volunteerHub,
                     style: GoogleFonts.lexend(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -107,7 +106,7 @@ class WelcomeScreen extends StatelessWidget {
                   FadeInUp(
                     delay: const Duration(milliseconds: 200),
                     child: Text(
-                      l10n.resala,
+                      AppStrings.resala,
                       style: GoogleFonts.lexend(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
@@ -120,7 +119,7 @@ class WelcomeScreen extends StatelessWidget {
                   FadeInUp(
                     delay: const Duration(milliseconds: 300),
                     child: Text(
-                      l10n.welcomeMessage,
+                      AppStrings.welcomeMessage,
                       style: GoogleFonts.notoSans(
                         fontSize: 16,
                         color: Theme.of(
@@ -139,9 +138,9 @@ class WelcomeScreen extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildBadge(context, Icons.school, l10n.expertTraining),
+                        _buildBadge(context, Icons.school, AppStrings.expertTraining),
                         const SizedBox(width: 16),
-                        _buildBadge(context, Icons.group, l10n.community),
+                        _buildBadge(context, Icons.group, AppStrings.community),
                       ],
                     ),
                   ),
@@ -174,7 +173,7 @@ class WelcomeScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              l10n.getStarted,
+                              AppStrings.getStarted,
                               style: GoogleFonts.lexend(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -203,9 +202,9 @@ class WelcomeScreen extends StatelessWidget {
                             fontSize: 12,
                           ),
                           children: [
-                            TextSpan(text: l10n.alreadyHaveAccount),
+                            TextSpan(text: AppStrings.alreadyHaveAccount),
                             TextSpan(
-                              text: l10n.logIn,
+                              text: AppStrings.logIn,
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface,
                                 fontWeight: FontWeight.bold,

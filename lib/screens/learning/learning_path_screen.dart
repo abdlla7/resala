@@ -2,7 +2,8 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../l10n/app_localizations.dart';
+import '../../constants/app_strings.dart';
+
 class LearningPathScreen extends StatelessWidget {
   const LearningPathScreen({super.key});
 
@@ -23,7 +24,7 @@ class LearningPathScreen extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      AppLocalizations.of(context)!.learningPathTitle,
+                      AppStrings.learningPathTitle,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.lexend(
                         fontSize: 18,
@@ -85,7 +86,7 @@ class LearningPathScreen extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  AppLocalizations.of(context)!.volunteerTrack,
+                                  AppStrings.volunteerTrack,
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -110,7 +111,7 @@ class LearningPathScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            AppLocalizations.of(context)!.disasterReliefBasics,
+                            AppStrings.disasterReliefBasics,
                             style: GoogleFonts.lexend(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -118,9 +119,7 @@ class LearningPathScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            AppLocalizations.of(
-                              context,
-                            )!.disasterReliefDescription,
+                            AppStrings.disasterReliefDescription,
                             style: TextStyle(
                               fontSize: 14,
                               color: Theme.of(
@@ -156,9 +155,7 @@ class LearningPathScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  AppLocalizations.of(
-                                    context,
-                                  )!.levelsComplete('3', '8'),
+                                  AppStrings.levelsComplete('3', '8'),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -210,10 +207,8 @@ class LearningPathScreen extends StatelessWidget {
                             _buildTimelineItem(
                               context,
                               level: 1,
-                              title: AppLocalizations.of(context)!.orientation,
-                              description: AppLocalizations.of(
-                                context,
-                              )!.orientationDesc,
+                              title: AppStrings.orientation,
+                              description: AppStrings.orientationDesc,
                               status: TimelineStatus.completed,
                               delay: 300,
                             ),
@@ -221,12 +216,8 @@ class LearningPathScreen extends StatelessWidget {
                             _buildTimelineItem(
                               context,
                               level: 2,
-                              title: AppLocalizations.of(
-                                context,
-                              )!.safetyProtocols,
-                              description: AppLocalizations.of(
-                                context,
-                              )!.safetyProtocolsDesc,
+                              title: AppStrings.safetyProtocols,
+                              description: AppStrings.safetyProtocolsDesc,
                               status: TimelineStatus.completed,
                               delay: 400,
                             ),
@@ -234,12 +225,8 @@ class LearningPathScreen extends StatelessWidget {
                             _buildTimelineItem(
                               context,
                               level: 3,
-                              title: AppLocalizations.of(
-                                context,
-                              )!.engagingCommunity,
-                              description: AppLocalizations.of(
-                                context,
-                              )!.engagingCommunityDesc,
+                              title: AppStrings.engagingCommunity,
+                              description: AppStrings.engagingCommunityDesc,
                               status: TimelineStatus.current,
                               delay: 500,
                               onAction: () => context.push('/lesson'),
@@ -248,12 +235,8 @@ class LearningPathScreen extends StatelessWidget {
                             _buildTimelineItem(
                               context,
                               level: 4,
-                              title: AppLocalizations.of(
-                                context,
-                              )!.crisisCommunication,
-                              description: AppLocalizations.of(
-                                context,
-                              )!.crisisCommunicationDesc,
+                              title: AppStrings.crisisCommunication,
+                              description: AppStrings.crisisCommunicationDesc,
                               status: TimelineStatus.locked,
                               delay: 600,
                             ),
@@ -261,12 +244,8 @@ class LearningPathScreen extends StatelessWidget {
                             _buildTimelineItem(
                               context,
                               level: 5,
-                              title: AppLocalizations.of(
-                                context,
-                              )!.fieldDeployment,
-                              description: AppLocalizations.of(
-                                context,
-                              )!.fieldDeploymentDesc,
+                              title: AppStrings.fieldDeployment,
+                              description: AppStrings.fieldDeploymentDesc,
                               status: TimelineStatus.locked,
                               delay: 700,
                             ),
@@ -360,9 +339,10 @@ class LearningPathScreen extends StatelessWidget {
                   color: isCurrent
                       ? Theme.of(context).cardColor
                       : (status == TimelineStatus.locked
-                            ? Colors.grey.shade50.withValues(
-                                alpha: 0.5,
-                              ) // Light gray for locked
+                            ? Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.5)
                             : Theme.of(context).cardColor),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
@@ -404,9 +384,9 @@ class LearningPathScreen extends StatelessWidget {
                                   ).withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(4),
                                 ),
-                                child: const Text(
-                                  'CURRENT LEVEL',
-                                  style: TextStyle(
+                                child: Text(
+                                  AppStrings.currentLevel,
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.bold,
                                     color: Color(0xFF92400E),
@@ -415,7 +395,7 @@ class LearningPathScreen extends StatelessWidget {
                               )
                             else
                               Text(
-                                'LEVEL $level',
+                                AppStrings.levelN(level),
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -468,7 +448,7 @@ class LearningPathScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                AppLocalizations.of(context)!.resumeLearning,
+                                AppStrings.resumeLearning,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),

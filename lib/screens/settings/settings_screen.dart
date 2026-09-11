@@ -1,65 +1,81 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
-import '../../controllers/settings_controller.dart';
-import '../../l10n/app_localizations.dart';
+import '../../blocs/auth/auth_bloc.dart';
+import '../../blocs/settings/settings_cubit.dart';
+import '../../blocs/settings/settings_state.dart';
+import '../../blocs/subscription/subscription_cubit.dart';
+import '../../constants/app_strings.dart';
 import '../../theme/app_theme.dart';
-import '../auth/auth_service.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-
-    // We can use Consumer or context.watch. Using context.watch allows accessing properties easily.
-    // However, since we want to rebuild the scaffold on theme change, keeping it high up is good.
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: 20,
-            color: Theme.of(context).iconTheme.color,
-          ),
-          onPressed: () => context.pop(),
-        ),
-        title: Text(
-          l10n.settings,
-          style: Theme.of(context).appBarTheme.titleTextStyle,
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            _ProfileSection(),
-            const SizedBox(height: 32),
-            const _AppearanceSection(),
-            const SizedBox(height: 32),
-            const _GeneralSection(),
-            const SizedBox(height: 32),
-            const _SupportSection(),
-            const SizedBox(height: 32),
-            const _SignOutButton(),
-            const SizedBox(height: 24),
-            Text(
-              "${l10n.version} 2.4.1 (Build 8902)",
-              style: TextStyle(
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.5),
-                fontWeight: FontWeight.w500,
-              ),
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state is Unauthenticated) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppStrings.signedOut)),
+          );
+          context.go('/login');
+        } else if (state is AuthFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text('${AppStrings.signOutFailed}: ${state.message}'),
             ),
-            const SizedBox(height: 20),
-          ],
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios_new,
+              size: 20,
+              color: Theme.of(context).iconTheme.color,
+            ),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(
+            AppStrings.settings,
+            style: Theme.of(context).appBarTheme.titleTextStyle,
+          ),
+          centerTitle: true,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            children: [
+              _ProfileSection(),
+              const SizedBox(height: 32),
+              const _AppearanceSection(),
+              const SizedBox(height: 32),
+              const _GeneralSection(),
+              const SizedBox(height: 32),
+              const _SupportSection(),
+              const SizedBox(height: 32),
+              const _SignOutButton(),
+              const SizedBox(height: 24),
+              Text(
+                '${AppStrings.version} 2.4.1 (Build 8902)',
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.5),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
@@ -72,7 +88,7 @@ class _ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+    final photoUrl = user?.photoURL;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -88,19 +104,26 @@ class _ProfileSection extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
+          CircleAvatar(
             radius: 30,
-            backgroundImage: NetworkImage(
-              'https://i.pravatar.cc/300',
-            ), // Placeholder
-            backgroundColor: Colors.grey,
+            backgroundColor:
+                Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
+            backgroundImage:
+                photoUrl != null ? NetworkImage(photoUrl) : null,
+            child: photoUrl == null
+                ? Icon(
+                    Icons.person,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 32,
+                  )
+                : null,
           ),
           const SizedBox(width: 16),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                user?.displayName ?? 'Guest',
+                user?.displayName ?? 'ضيف',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -108,12 +131,13 @@ class _ProfileSection extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                l10n.fieldCoordinator,
+                AppStrings.fieldCoordinator,
                 style: TextStyle(
                   fontSize: 14,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.6),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -130,105 +154,110 @@ class _AppearanceSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    // Access the shared controller instance
-    final controller = context.watch<SettingsController>();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.appearance,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Row(
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settings) {
+        final cubit = context.read<SettingsCubit>();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () => controller.setTheme(AppThemeType.modernGreen),
-                child: _ThemeCard(
-                  title: l10n.modernGreen,
-                  color: AppTheme.greenPrimary,
-                  isSelected:
-                      controller.currentThemeType == AppThemeType.modernGreen,
-                  gradientColors: [
-                    const Color(0xFF9EFFAE),
-                    const Color(0xFF2BEE4B).withValues(alpha: 0.6),
-                  ],
-                ),
-              ),
+            Text(
+              AppStrings.appearance,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: GestureDetector(
-                onTap: () => controller.setTheme(AppThemeType.classicBlue),
-                child: _ThemeCard(
-                  title: l10n.classicBlue,
-                  color: AppTheme.bluePrimary,
-                  isSelected:
-                      controller.currentThemeType == AppThemeType.classicBlue,
-                  gradientColors: [Colors.blue[200]!, Colors.blue],
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        // Dark Mode Toggle
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.dark_mode,
-                      color: Theme.of(context).colorScheme.primary,
-                      size: 20,
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => cubit.setTheme(AppThemeType.modernGreen),
+                    child: _ThemeCard(
+                      title: AppStrings.modernGreen,
+                      color: AppTheme.greenPrimary,
+                      isSelected:
+                          settings.themeType == AppThemeType.modernGreen,
+                      gradientColors: [
+                        const Color(0xFF9EFFAE),
+                        const Color(0xFF2BEE4B).withValues(alpha: 0.6),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    l10n.darkMode,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => cubit.setTheme(AppThemeType.classicBlue),
+                    child: _ThemeCard(
+                      title: AppStrings.classicBlue,
+                      color: AppTheme.bluePrimary,
+                      isSelected:
+                          settings.themeType == AppThemeType.classicBlue,
+                      gradientColors: [Colors.blue[200]!, Colors.blue],
                     ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            // Dark Mode Toggle
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context)
+                        .shadowColor
+                        .withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
-              Switch(
-                value: controller.isDarkMode,
-                onChanged: (value) {
-                  controller.toggleBrightness();
-                },
-                activeThumbColor: Theme.of(context).colorScheme.primary,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .primary
+                              .withValues(alpha: 0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          Icons.dark_mode,
+                          color: Theme.of(context).colorScheme.primary,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        AppStrings.darkMode,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Switch(
+                    value: settings.isDarkMode,
+                    onChanged: (_) => cubit.toggleBrightness(),
+                    activeThumbColor:
+                        Theme.of(context).colorScheme.primary,
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -279,7 +308,6 @@ class _ThemeCard extends StatelessWidget {
             ),
             child: Stack(
               children: [
-                // Decorative elements
                 Positioned(
                   top: 20,
                   left: 20,
@@ -340,7 +368,10 @@ class _ThemeCard extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
             ),
           ),
         ],
@@ -354,86 +385,65 @@ class _GeneralSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final controller = context.watch<SettingsController>();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.general,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).shadowColor.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+    return BlocBuilder<SettingsCubit, SettingsState>(
+      builder: (context, settings) {
+        final cubit = context.read<SettingsCubit>();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              AppStrings.general,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context)
+                        .shadowColor
+                        .withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: Column(
-            children: [
-              _SettingsTile(
-                icon: Icons.notifications,
-                iconColor: Colors.blue,
-                iconBgColor: Colors.blue.withValues(alpha: 0.1),
-                title: l10n.notifications,
-                trailing: Switch(
-                  value: true,
-                  onChanged: (v) {},
-                  activeThumbColor: Theme.of(context).primaryColor,
-                ),
-              ),
-              const Divider(height: 1, indent: 60, endIndent: 20),
-              _SettingsTile(
-                icon: Icons.download_rounded,
-                iconColor: Colors.purple,
-                iconBgColor: Colors.purple.withValues(alpha: 0.1),
-                title: l10n.downloadOffline,
-                trailing: Switch(
-                  value: false,
-                  onChanged: (v) {},
-                  activeThumbColor: Theme.of(context).primaryColor,
-                ),
-              ),
-              const Divider(height: 1, indent: 60, endIndent: 20),
-              _SettingsTile(
-                icon: Icons.language,
-                iconColor: Colors.orange,
-                iconBgColor: Colors.orange.withValues(alpha: 0.1),
-                title: l10n.language,
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      controller.isArabic ? 'العربية' : 'English',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontWeight: FontWeight.w500,
-                      ),
+              child: Column(
+                children: [
+                  _SettingsTile(
+                    icon: Icons.notifications,
+                    iconColor: Colors.blue,
+                    iconBgColor: Colors.blue.withValues(alpha: 0.1),
+                    title: AppStrings.notifications,
+                    trailing: Switch(
+                      value: settings.notificationsEnabled,
+                      onChanged: (_) => cubit.toggleNotifications(),
+                      activeThumbColor:
+                          Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 8),
-                    Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: Colors.grey[400],
+                  ),
+                  const Divider(height: 1, indent: 60, endIndent: 20),
+                  _SettingsTile(
+                    icon: Icons.download_rounded,
+                    iconColor: Colors.purple,
+                    iconBgColor: Colors.purple.withValues(alpha: 0.1),
+                    title: AppStrings.downloadOffline,
+                    trailing: Switch(
+                      value: settings.downloadOfflineEnabled,
+                      onChanged: (_) => cubit.toggleDownloadOffline(),
+                      activeThumbColor:
+                          Theme.of(context).colorScheme.primary,
                     ),
-                  ],
-                ),
-                onTap: () {
-                  controller.toggleLanguage();
-                },
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -441,14 +451,29 @@ class _GeneralSection extends StatelessWidget {
 class _SupportSection extends StatelessWidget {
   const _SupportSection();
 
+  void _showComingSoon(BuildContext context, String title) {
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(title),
+        content: Text(AppStrings.comingSoon),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(AppStrings.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          l10n.support,
+          AppStrings.support,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
@@ -470,26 +495,27 @@ class _SupportSection extends StatelessWidget {
                 icon: Icons.help_outline,
                 iconColor: Colors.teal,
                 iconBgColor: Colors.teal.withValues(alpha: 0.1),
-                title: l10n.helpCenter,
+                title: AppStrings.helpCenter,
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
                   color: Colors.grey[400],
                 ),
-                onTap: () {},
+                onTap: () => _showComingSoon(context, AppStrings.helpCenter),
               ),
               const Divider(height: 1, indent: 60, endIndent: 20),
               _SettingsTile(
                 icon: Icons.bug_report_outlined,
                 iconColor: Colors.red,
                 iconBgColor: Colors.red.withValues(alpha: 0.1),
-                title: l10n.reportIssue,
+                title: AppStrings.reportIssue,
                 trailing: Icon(
                   Icons.arrow_forward_ios,
                   size: 16,
                   color: Colors.grey[400],
                 ),
-                onTap: () {},
+                onTap: () =>
+                    _showComingSoon(context, AppStrings.reportIssue),
               ),
             ],
           ),
@@ -540,58 +566,56 @@ class _SignOutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return InkWell(
-      onTap: () async {
-        // Handle sign out
-        try {
-          await authService.value.signOut();
-          if (context.mounted) {
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(l10n.signedOut)));
-            context.go('/');
-          }
-        } catch (e) {
-          if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${l10n.signOutFailed}: ${e.toString()}')),
-            );
-          }
-        }
-      },
-
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        final isLoading = state is AuthLoading;
+        return InkWell(
+          onTap: isLoading
+              ? null
+              : () {
+                  context.read<SubscriptionCubit>().reset();
+                  context.read<AuthBloc>().add(const SignOutRequested());
+                },
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.red.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+              border:
+                  Border.all(color: Colors.red.withValues(alpha: 0.1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.red.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.logout, color: Theme.of(context).colorScheme.error),
-            const SizedBox(width: 8),
-            Text(
-              l10n.signOut,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.error,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.logout,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        AppStrings.signOut,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.error,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

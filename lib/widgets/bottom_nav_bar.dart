@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../l10n/app_localizations.dart';
+import '../constants/app_strings.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,12 +13,6 @@ class BottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // We are simulating the custom pill shaped selection manually to match HTML exactly
-    // Or we can use BottomNavigationBar. HTML shows a very specific style:
-    // "Home" is selected with a light green pill background.
-    // Others are gray icons.
-
-    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.only(top: 8, bottom: 20),
       decoration: BoxDecoration(
@@ -29,10 +23,10 @@ class BottomNavBar extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(context, 0, Icons.home, l10n.home),
-            _buildNavItem(context, 1, Icons.menu_book, l10n.courses),
-            _buildNavItem(context, 2, Icons.bar_chart, l10n.stats),
-            _buildNavItem(context, 3, Icons.person, l10n.profile),
+            _buildNavItem(context, 0, Icons.home, AppStrings.home),
+            _buildNavItem(context, 1, Icons.menu_book, AppStrings.courses),
+            _buildNavItem(context, 2, Icons.bar_chart, AppStrings.stats),
+            _buildNavItem(context, 3, Icons.person, AppStrings.settings),
           ],
         ),
       ),
@@ -56,7 +50,10 @@ class BottomNavBar extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
+                  ? Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.2)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(16),
             ),
@@ -65,7 +62,10 @@ class BottomNavBar extends StatelessWidget {
               size: 24,
               color: isSelected
                   ? Theme.of(context).colorScheme.onSurface
-                  : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                  : Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withValues(alpha: 0.4),
             ),
           ),
           const SizedBox(height: 4),

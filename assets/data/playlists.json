@@ -1,0 +1,123 @@
+[{
+    "playlists": [
+        {
+            "playlist_title": "الصف الثالث الاعدادي",
+            "playlist_url": "https://www.youtube.com/playlist?list=PLrxdZQyUTREU-7QtBXciSEFMo99yA9VJW",
+            "videos_count": 7,
+            "grade": "3rd_prep",
+            "videos": [
+                {
+                    "title": "النشاط التعديني في العالم | جغرافيا الصف الثالث الاعداداي",
+                    "url": "https://www.youtube.com/watch?v=snhN7rRVBk0",
+                    "duration": 3867
+                },
+                {
+                    "title": "الرعي والثروة الحيوانية - جغرافيا الصف الثالث الاعدادي",
+                    "url": "https://www.youtube.com/watch?v=wux8cwujN8w",
+                    "duration": 3211
+                },
+                {
+                    "title": "ثورة 23 يوليو | تاريخ الصف الثالث الاعدادي 2026",
+                    "url": "https://www.youtube.com/watch?v=uyJGrBRnvwg",
+                    "duration": 5401
+                },
+                {
+                    "title": "النشاط الزراعي في العالم | جغرافيا الصف الثالث الاعدادي",
+                    "url": "https://www.youtube.com/watch?v=FMh5Kstd-1Q",
+                    "duration": 3530
+                },
+                {
+                    "title": "القضية الفلسطينية ج1|تاريخ الصف الثالث الاعدادي",
+                    "url": "https://www.youtube.com/watch?v=6pT4EswbNuE",
+                    "duration": 2469
+                },
+                {
+                    "title": "النشاط الصناعي في العالم | جغرافيا الصف الثالث الاعدادي",
+                    "url": "https://www.youtube.com/watch?v=M5SzJ6M7mko",
+                    "duration": 1626
+                },
+                {
+                    "title": "The Palestinian Cause Part 2 | 3rd Year Middle School History",
+                    "url": "https://www.youtube.com/watch?v=Vaudei8g_hY",
+                    "duration": 5794
+                }
+            ]
+        },
+        {
+            "playlist_title": "الصف الثاني الثانوي",
+            "playlist_url": "https://www.youtube.com/playlist?list=PLrxdZQyUTREVXA2pR8SuzPHGIWxiSGXRa",
+            "videos_count": 6,
+            "grade": "2st_sec",
+            "videos": [
+                {
+                    "title": "الحملات الصليبية والتصدي لها ج2 | تاريخ الصف الثاني الثانوي",
+                    "url": "https://www.youtube.com/watch?v=9211PYCjJSQ",
+                    "duration": 4291
+                },
+                {
+                    "title": "الحملات  الصليبية والتصدي لها | تاريخ الصف الثاني الثانوي",
+                    "url": "https://www.youtube.com/watch?v=LJpctijRR1o",
+                    "duration": 4063
+                },
+                {
+                    "title": "الدولة الفاطمية في مصر | تاريخ الصف الثاني الثانوي",
+                    "url": "https://www.youtube.com/watch?v=sbkPqcXlZQo",
+                    "duration": 3314
+                },
+                {
+                    "title": "الدولة الطولونية والاخشيدية - تاريخ الصف الثاني الثانوي",
+                    "url": "https://www.youtube.com/watch?v=rMoIR2P8BYI",
+                    "duration": 4256
+                },
+                {
+                    "title": "الفتح الاسلامي لمصر ج2   | تاريخ الصف الثاني الثانوي 2026",
+                    "url": "https://www.youtube.com/watch?v=rJswR2pNVm8",
+                    "duration": 3203
+                },
+                {
+                    "title": "الفتح الاسلامي لمصر ج1 | الصف الثاني الثانوي ترم تاني 2026",
+                    "url": "https://www.youtube.com/watch?v=HsUHgYZn_9M",
+                    "duration": 4464
+                }
+            ]
+        },
+        {
+            "playlist_title": "تاريخ | الصف الاول الثانوي",
+            "playlist_url": "https://www.youtube.com/playlist?list=PLrxdZQyUTREUfB-gKb459Ib239av0aNui",
+            "videos_count": 6,
+            "grade": "1st_sec",
+            "videos": [
+                {
+                    "title": "حضارة الاغريق ج2 | تاريخ الصف الاول الثانوي",
+                    "url": "https://www.youtube.com/watch?v=R1_lI5jxrBw",
+                    "duration": 4788
+                },
+                {
+                    "title": "حضارة الاغريق | تاريخ الصف الاول الثانوي",
+                    "url": "https://www.youtube.com/watch?v=7TBDZomRe-k",
+                    "duration": 3267
+                },
+                {
+                    "title": "حضارة  فينيقيا ج2 | تاريخ الصف الاول الثانوي",
+                    "url": "https://www.youtube.com/watch?v=N3_wyXXFu3o",
+                    "duration": 4462
+                },
+                {
+                    "title": "حضارة فينيقيا - تاريخ الصف الاول الثانوي",
+                    "url": "https://www.youtube.com/watch?v=lrWigwkJ_J8",
+                    "duration": 3923
+                },
+                {
+                    "title": "حضارة بلاد العراق القديم ج2 | تاريخ الصف الاول الثانوي 2026",
+                    "url": "https://www.youtube.com/watch?v=ZMlgM4P2H-o",
+                    "duration": 4040
+                },
+                {
+                    "title": "حضارة بلاد العراق القديم ج1 | تاريخ اولى ثانوي",
+                    "url": "https://www.youtube.com/watch?v=qGPrCp2YEmA",
+                    "duration": 4318
+                }
+            ]
+        }
+    ]
+}]

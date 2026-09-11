@@ -12,7 +12,20 @@
           "package_name": "com.example.resala"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "639837271318-6ds0gmjeqlsptl5h4teislehal05q022.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.resala",
+            "certificate_hash": "60078183c2b303bdf8d88a63999873a663b56219"
+          }
+        },
+        {
+          "client_id": "639837271318-duu0h03384i5pjdukuoafjdpu97su3c9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCHltzl_9MlD1VfQLQIsz-CoaCJz_Q8wxs"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "639837271318-duu0h03384i5pjdukuoafjdpu97su3c9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "639837271318-ako0os48i87ec89u0s20km4j7v5jhokk.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.resala"
+              }
+            }
+          ]
         }
       }
     }

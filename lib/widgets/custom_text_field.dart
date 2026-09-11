@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -7,6 +8,8 @@ class CustomTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final bool isPassword;
   final TextEditingController? controller;
+  final TextInputType? keyboardType;
+  final List<TextInputFormatter>? inputFormatters;
 
   const CustomTextField({
     super.key,
@@ -15,6 +18,8 @@ class CustomTextField extends StatelessWidget {
     this.suffixIcon,
     this.isPassword = false,
     this.controller,
+    this.keyboardType,
+    this.inputFormatters,
   });
 
   @override
@@ -48,6 +53,8 @@ class CustomTextField extends StatelessWidget {
           child: TextField(
             controller: controller,
             obscureText: isPassword,
+            keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
             decoration: InputDecoration(
               hintText: placeholder,
               hintStyle: TextStyle(

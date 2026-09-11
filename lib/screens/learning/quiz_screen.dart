@@ -364,7 +364,8 @@ class _QuizScreenState extends State<QuizScreen> {
                       backgroundColor: passed
                           ? const Color(0xFF2BEE4B)
                           : theme.primaryColor,
-                      foregroundColor: const Color.fromARGB(255, 255, 48, 48),
+                      foregroundColor:
+                          passed ? Colors.black : Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
