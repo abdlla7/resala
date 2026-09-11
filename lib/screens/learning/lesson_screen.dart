@@ -14,6 +14,7 @@ class LessonScreen extends StatefulWidget {
 
 class _LessonScreenState extends State<LessonScreen> {
   late YoutubePlayerController _controller;
+  bool _showControls = true;
 
   @override
   void initState() {
@@ -22,8 +23,10 @@ class _LessonScreenState extends State<LessonScreen> {
       videoId: 'VbAYusreHb0',
       autoPlay: false,
       params: const YoutubePlayerParams(
-        showControls: true,
-        showFullscreenButton: true,
+        showControls: false,
+        showFullscreenButton: false,
+        showVideoAnnotations: false,
+        pointerEvents: PointerEvents.none,
       ),
     );
   }
@@ -32,6 +35,30 @@ class _LessonScreenState extends State<LessonScreen> {
   void dispose() {
     _controller.close();
     super.dispose();
+  }
+
+  String _formatDuration(Duration duration) {
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    final hours = duration.inHours;
+    if (hours > 0) {
+      return '$hours:$minutes:$seconds';
+    }
+    return '$minutes:$seconds';
+  }
+
+  void _togglePlayPause(PlayerState playerState) {
+    if (playerState == PlayerState.playing) {
+      _controller.pauseVideo();
+    } else {
+      _controller.playVideo();
+    }
+  }
+
+  void _seekRelative(Duration currentPosition, Duration duration, int seconds) {
+    final maxSecs = duration.inSeconds > 0 ? duration.inSeconds : 3600;
+    final newSeconds = (currentPosition.inSeconds + seconds).clamp(0, maxSecs).toDouble();
+    _controller.seekTo(seconds: newSeconds, allowSeekAhead: true);
   }
 
   @override
@@ -69,13 +96,181 @@ class _LessonScreenState extends State<LessonScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Video Player Section
+                  // Video Player Section with Custom Controls Overlay
                   FadeInDown(
                     child: SizedBox(
                       height: 220,
                       width: double.infinity,
-                      child: YoutubePlayer(
-                        controller: _controller,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          color: Colors.black,
+                          child: Stack(
+                            children: [
+                              // 1. Native Youtube Player
+                              Positioned.fill(
+                                child: YoutubePlayer(
+                                  controller: _controller,
+                                ),
+                              ),
+
+                              // 2. Invisible GestureDetector layer intercepting all direct clicks
+                              Positioned.fill(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _showControls = !_showControls;
+                                    });
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                  ),
+                                ),
+                              ),
+
+                              // 3. Custom Controls Overlay
+                              if (_showControls)
+                                Positioned.fill(
+                                  child: StreamBuilder<YoutubePlayerValue>(
+                                    stream: _controller.stream,
+                                    builder: (context, playerSnapshot) {
+                                      final playerState = _controller.value.playerState;
+                                      final isPlaying = playerState == PlayerState.playing;
+                                      final duration = _controller.metadata.duration;
+
+                                      return Container(
+                                        color: Colors.black.withValues(alpha: 0.45),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            const SizedBox(height: 10),
+
+                                            // Center Playback Controls
+                                            StreamBuilder<YoutubeVideoState>(
+                                              stream: _controller.videoStateStream,
+                                              initialData: const YoutubeVideoState(),
+                                              builder: (context, videoSnapshot) {
+                                                final position = videoSnapshot.data?.position ?? Duration.zero;
+
+                                                return Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    // Rewind 10s
+                                                    IconButton(
+                                                      iconSize: 36,
+                                                      icon: const Icon(
+                                                        Icons.replay_10_rounded,
+                                                        color: Colors.white,
+                                                      ),
+                                                      onPressed: () => _seekRelative(position, duration, -10),
+                                                    ),
+                                                    const SizedBox(width: 16),
+
+                                                    // Play / Pause Toggle
+                                                    GestureDetector(
+                                                      onTap: () => _togglePlayPause(playerState),
+                                                      child: Container(
+                                                        padding: const EdgeInsets.all(12),
+                                                        decoration: const BoxDecoration(
+                                                          color: Color(0xFF2BEE4B),
+                                                          shape: BoxShape.circle,
+                                                        ),
+                                                        child: Icon(
+                                                          isPlaying
+                                                              ? Icons.pause_rounded
+                                                              : Icons.play_arrow_rounded,
+                                                          color: Colors.black,
+                                                          size: 36,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 16),
+
+                                                    // Forward 10s
+                                                    IconButton(
+                                                      iconSize: 36,
+                                                      icon: const Icon(
+                                                        Icons.forward_10_rounded,
+                                                        color: Colors.white,
+                                                      ),
+                                                      onPressed: () => _seekRelative(position, duration, 10),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+
+                                            // Bottom Controls Bar (Time & Seek Slider)
+                                            StreamBuilder<YoutubeVideoState>(
+                                              stream: _controller.videoStateStream,
+                                              initialData: const YoutubeVideoState(),
+                                              builder: (context, videoSnapshot) {
+                                                final position = videoSnapshot.data?.position ?? Duration.zero;
+                                                final totalSeconds = duration.inSeconds > 0
+                                                    ? duration.inSeconds.toDouble()
+                                                    : 1.0;
+                                                final currentSeconds = position.inSeconds
+                                                    .clamp(0, totalSeconds.toInt())
+                                                    .toDouble();
+
+                                                return Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                  child: Row(
+                                                    children: [
+                                                      Text(
+                                                        _formatDuration(position),
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: SliderTheme(
+                                                          data: SliderTheme.of(context).copyWith(
+                                                            trackHeight: 3,
+                                                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                                            activeTrackColor: const Color(0xFF2BEE4B),
+                                                            inactiveTrackColor: Colors.white30,
+                                                            thumbColor: const Color(0xFF2BEE4B),
+                                                          ),
+                                                          child: Slider(
+                                                            value: currentSeconds.clamp(0.0, totalSeconds),
+                                                            min: 0.0,
+                                                            max: totalSeconds,
+                                                            onChanged: (value) {
+                                                              _controller.seekTo(
+                                                                seconds: value,
+                                                                allowSeekAhead: true,
+                                                              );
+                                                            },
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        _formatDuration(duration),
+                                                        style: const TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 12,
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ),
