@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '639837271318',
     projectId: 'resala-65331',
     storageBucket: 'resala-65331.firebasestorage.app',
+    androidClientId: '639837271318-6ds0gmjeqlsptl5h4teislehal05q022.apps.googleusercontent.com',
+    iosClientId: '639837271318-ako0os48i87ec89u0s20km4j7v5jhokk.apps.googleusercontent.com',
     iosBundleId: 'com.example.resala',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '639837271318',
     projectId: 'resala-65331',
     storageBucket: 'resala-65331.firebasestorage.app',
+    androidClientId: '639837271318-6ds0gmjeqlsptl5h4teislehal05q022.apps.googleusercontent.com',
+    iosClientId: '639837271318-ako0os48i87ec89u0s20km4j7v5jhokk.apps.googleusercontent.com',
     iosBundleId: 'com.example.resala',
   );
 

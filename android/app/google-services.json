@@ -58,6 +58,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "639837271318-ajeltjoee37p2q0t92sl7kv4pk56q3d6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.muhammedelshreay.resala",
+            "certificate_hash": "60078183c2b303bdf8d88a63999873a663b56219"
+          }
+        },
+        {
           "client_id": "639837271318-duu0h03384i5pjdukuoafjdpu97su3c9.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../constants/app_strings.dart';
 import '../../models/playlist_model.dart';
 import '../../repositories/playlists_repository.dart';
 
@@ -29,8 +31,9 @@ class PlaylistsCubit extends Cubit<PlaylistsState> {
     try {
       final playlists = await _repository.getPlaylistsByGrade(grade);
       emit(PlaylistsLoaded(playlists: playlists, grade: grade));
-    } catch (e) {
-      emit(PlaylistsError(e.toString()));
+    } catch (e, st) {
+      debugPrint('[PlaylistsCubit] loadPlaylistsByGrade error: $e\n$st');
+      emit(const PlaylistsError(AppStrings.errorOccurred));
     }
   }
 }

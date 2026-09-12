@@ -1,5 +1,6 @@
-import 'package:equatable/equatable.dart';
+﻿import 'package:equatable/equatable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -47,8 +48,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         return;
       }
       await _resolveUserState(firebaseUser, emit);
-    } catch (e) {
-      emit(AuthFailure(AppStrings.errorPrefix(e.toString())));
+    } catch (e, st) {
+      debugPrint('[AuthBloc] _onCheckAuthStatus error: $e\n$st');
+      emit(const AuthFailure(AppStrings.errorOccurred));
     }
   }
 
@@ -81,10 +83,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
 
       await _resolveUserState(firebaseUser, emit);
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e, st) {
+      debugPrint('[AuthBloc] _onGoogleSignIn FirebaseAuthException: $e\n$st');
       emit(AuthFailure(_mapFirebaseError(e.code)));
-    } catch (e) {
-      emit(AuthFailure(AppStrings.errorPrefix(e.toString())));
+    } catch (e, st) {
+      debugPrint('[AuthBloc] _onGoogleSignIn error: $e\n$st');
+      emit(const AuthFailure(AppStrings.errorOccurred));
     }
   }
 
@@ -118,10 +122,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
 
       emit(Authenticated(userEntity));
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('[AuthBloc] _onCompleteProfile error: $e\n$st');
       // Return to ProfileIncomplete so the user can retry.
       emit(currentState);
-      emit(AuthFailure(AppStrings.errorPrefix(e.toString())));
+      emit(const AuthFailure(AppStrings.errorOccurred));
     }
   }
 
@@ -135,8 +140,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       await _googleSignIn.signOut();
       await _auth.signOut();
       emit(const Unauthenticated());
-    } catch (e) {
-      emit(AuthFailure(AppStrings.errorPrefix(e.toString())));
+    } catch (e, st) {
+      debugPrint('[AuthBloc] _onSignOut error: $e\n$st');
+      emit(const AuthFailure(AppStrings.errorOccurred));
     }
   }
 
