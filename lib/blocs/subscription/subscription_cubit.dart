@@ -24,8 +24,12 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
   /// Evaluates the subscription from a [UserEntity] that has already been
   /// loaded by [AuthBloc] — no extra Firestore read needed.
   void checkSubscriptionStatus(UserEntity user) {
-    if (user.hasActiveSubscription) {
-      emit(SubscriptionActive(expiryDate: user.subscriptionEndDate!));
+    // hasActiveSubscription already guarantees subscriptionEndDate is non-null
+    // and in the future. We capture it into a local variable so the type system
+    // sees a non-nullable DateTime without a forced-unwrap bang operator.
+    final endDate = user.subscriptionEndDate;
+    if (user.hasActiveSubscription && endDate != null) {
+      emit(SubscriptionActive(expiryDate: endDate));
     } else {
       emit(const SubscriptionExpired());
     }
@@ -52,7 +56,15 @@ class SubscriptionCubit extends Cubit<SubscriptionState> {
         code: code,
       );
 
-      emit(SubscriptionActive(expiryDate: updatedUser.subscriptionEndDate!));
+      // Guard against a partial Firestore write where subscriptionEndDate was
+      // not populated; treat that as a transaction failure rather than crashing.
+      final endDate = updatedUser.subscriptionEndDate;
+      if (endDate == null) {
+        emit(SubscriptionFailure(AppStrings.redemptionTransactionFailed));
+        return;
+      }
+
+      emit(SubscriptionActive(expiryDate: endDate));
     } on RedemptionException catch (e) {
       switch (e.failure) {
         case RedemptionFailure.invalidCode:

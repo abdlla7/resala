@@ -1,4 +1,4 @@
-﻿import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 ValueNotifier<AuthService> authService = ValueNotifier(AuthService());
@@ -42,9 +42,12 @@ class AuthService {
       _firebaseAuth.sendPasswordResetEmail(email: email);
 
   Future<void> updateusername(String displayName) async {
-    if (currentUser != null) {
-      await currentUser!.updateDisplayName(displayName);
-      await currentUser!.reload();
+    // Capture once before any `await` so a concurrent sign-out between the
+    // null-check and either async call cannot produce a null-dereference crash.
+    final user = currentUser;
+    if (user != null) {
+      await user.updateDisplayName(displayName);
+      await user.reload();
     }
   }
 

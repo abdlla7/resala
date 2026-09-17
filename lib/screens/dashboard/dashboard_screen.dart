@@ -169,9 +169,10 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final initials = (user?.fullName.isNotEmpty ?? false)
-        ? user!.fullName.trim()[0].toUpperCase()
-        : '؟';
+    // fullName is non-nullable String but defaults to '' from Firestore.
+    // Trim before checking so a whitespace-only name doesn't sneak past isNotEmpty.
+    final name = user?.fullName.trim() ?? '';
+    final initials = name.isNotEmpty ? name[0].toUpperCase() : '؟';
 
     return Container(
       width: 48,

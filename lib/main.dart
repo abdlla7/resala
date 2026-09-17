@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:ui';
 
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -33,6 +36,19 @@ Future<void> main() async {
     return;
   }
 
+  // ── Global Crashlytics error boundary (release builds only) ──────────────
+  // In debug mode we let errors surface normally so the developer sees them.
+  if (!kDebugMode) {
+    // Flutter framework errors (widget build exceptions, etc.)
+    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+
+    // Errors on the root isolate that Flutter doesn't catch itself.
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
   // Initialise settings (loads theme preference from SharedPreferences).
   final settingsCubit = SettingsCubit();
   await settingsCubit.loadSettings();
@@ -61,6 +77,7 @@ Future<void> main() async {
       child: _AppLifecycle(
         authBloc: authBloc,
         subscriptionCubit: subscriptionCubit,
+        settingsCubit: settingsCubit,
         child: ResalaApp(router: router),
       ),
     ),
@@ -68,25 +85,28 @@ Future<void> main() async {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Lifecycle owner for global BLoC subscriptions
+// Lifecycle owner for global BLoC subscriptions AND resource cleanup
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Owns the cross-cubit [StreamSubscription] that bridges [AuthBloc] state
-/// changes to [SubscriptionCubit] actions.
+/// changes to [SubscriptionCubit] actions, **and** is the authoritative
+/// lifetime owner for all three manually-instantiated blocs/cubits.
 ///
-/// Placing this in a [StatefulWidget] ensures the subscription is
-/// **cancelled** when the widget tree is unmounted, preventing the memory
-/// leak that would occur if the subscription were held at the top-level
-/// [main] function with no cancel path.
+/// Because [BlocProvider.value] does NOT close a bloc on dispose (the caller
+/// is responsible for its lifetime), we close [AuthBloc], [SubscriptionCubit]
+/// and [SettingsCubit] explicitly in [_AppLifecycleState.dispose], preventing
+/// the resource leak that would occur if they were held only in [main].
 class _AppLifecycle extends StatefulWidget {
   const _AppLifecycle({
     required this.authBloc,
     required this.subscriptionCubit,
+    required this.settingsCubit,
     required this.child,
   });
 
   final AuthBloc authBloc;
   final SubscriptionCubit subscriptionCubit;
+  final SettingsCubit settingsCubit;
   final Widget child;
 
   @override
@@ -113,6 +133,11 @@ class _AppLifecycleState extends State<_AppLifecycle> {
   @override
   void dispose() {
     _authSubscription.cancel();
+    // Close all manually-instantiated blocs/cubits that were provided via
+    // BlocProvider.value (which does NOT auto-close them).
+    widget.authBloc.close();
+    widget.subscriptionCubit.close();
+    widget.settingsCubit.close();
     super.dispose();
   }
 
