@@ -22,7 +22,10 @@ class FirestoreService {
   Future<UserEntity?> getUserDocument(String uid) async {
     final doc = await _db.collection(_colUsers).doc(uid).get();
     if (!doc.exists || doc.data() == null) return null;
-    return UserEntity.fromFirestore(doc.data()!, uid);
+    // data() is non-null here (guarded above); capture into a local variable
+    // to avoid a forced-unwrap bang while satisfying the type system.
+    final data = doc.data()!;
+    return UserEntity.fromFirestore(data, uid);
   }
 
   /// Saves (or merges) the student's profile under `/users/{uid}`.
@@ -77,7 +80,9 @@ class FirestoreService {
         throw const RedemptionException(RedemptionFailure.invalidCode);
       }
 
-      final codeData = codeSnap.data()!;
+      // codeSnap.exists was verified above; data() is non-null here.
+      // Capture into a local variable to avoid the forced-unwrap bang.
+      final codeData = codeSnap.data() ?? <String, dynamic>{};
       final isRedeemed = codeData['is_redeemed'] as bool? ?? false;
       if (isRedeemed) {
         throw const RedemptionException(RedemptionFailure.alreadyRedeemed);

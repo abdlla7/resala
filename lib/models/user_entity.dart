@@ -42,14 +42,18 @@ class UserEntity extends Equatable {
   // ── Computed helpers ──────────────────────────────────────────────────────
 
   /// `true` when [subscriptionEndDate] exists and has not yet passed.
-  bool get hasActiveSubscription =>
-      subscriptionEndDate != null &&
-      subscriptionEndDate!.isAfter(DateTime.now());
+  bool get hasActiveSubscription {
+    final endDate = subscriptionEndDate;
+    return endDate != null && endDate.isAfter(DateTime.now());
+  }
 
   /// Remaining days until the subscription expires (0 when expired or absent).
   int get remainingDays {
     if (!hasActiveSubscription) return 0;
-    return subscriptionEndDate!.difference(DateTime.now()).inDays;
+    // hasActiveSubscription guarantees subscriptionEndDate is non-null.
+    final endDate = subscriptionEndDate;
+    if (endDate == null) return 0; // defensive — unreachable in practice
+    return endDate.difference(DateTime.now()).inDays;
   }
 
   // ── Serialisation ─────────────────────────────────────────────────────────

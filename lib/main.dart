@@ -175,7 +175,9 @@ class ResalaApp extends StatelessWidget {
 
           builder: (context, child) => Directionality(
             textDirection: TextDirection.rtl,
-            child: child!,
+            // child is Widget? per the API contract; guard with a fallback so
+            // we never crash if the router omits it in an edge-case.
+            child: child ?? const SizedBox.shrink(),
           ),
 
           routerConfig: router,

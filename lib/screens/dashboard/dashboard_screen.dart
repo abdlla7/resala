@@ -100,7 +100,7 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradeName = user != null
-        ? AppStrings.gradeDisplayName(user!.academicGrade)
+        ? AppStrings.gradeDisplayName(user?.academicGrade ?? '')
         : '';
 
     return Padding(

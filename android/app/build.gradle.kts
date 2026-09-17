@@ -9,10 +9,11 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
-// ── Release signing — reads from android/key.properties when present ─────────
-// On developer machines without a keystore the file is absent and the release
-// buildType falls back to debug signing so `flutter run --release` still works.
-// CI/CD pipelines must write key.properties before invoking `flutter build`.
+// ── Release signing — requires android/key.properties ────────────────────────
+// The file is excluded from version control via .gitignore.
+// CI/CD pipelines must write it before invoking `flutter build apk --release`
+// or `flutter build appbundle`.  A missing file causes an explicit build
+// failure rather than silently shipping a debug-signed binary to the store.
 val keyPropertiesFile = rootProject.file("key.properties")
 val keyProperties = java.util.Properties()
 if (keyPropertiesFile.exists()) {
@@ -34,9 +35,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.muhammedelshreay.resala"
-        // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = 36
@@ -45,11 +44,14 @@ android {
     }
 
     signingConfigs {
+        // Always declare the release config; values are populated from
+        // key.properties.  If the file is absent we will fail below in
+        // buildTypes so the error is surfaced at the right point.
         if (keyPropertiesFile.exists()) {
             create("release") {
-                keyAlias     = keyProperties["keyAlias"]    as String
-                keyPassword  = keyProperties["keyPassword"] as String
-                storeFile    = file(keyProperties["storeFile"] as String)
+                keyAlias      = keyProperties["keyAlias"]     as String
+                keyPassword   = keyProperties["keyPassword"]  as String
+                storeFile     = file(keyProperties["storeFile"] as String)
                 storePassword = keyProperties["storePassword"] as String
             }
         }
@@ -57,15 +59,19 @@ android {
 
     buildTypes {
         release {
-            // Use the production signing config when key.properties is present;
-            // fall back to debug signing for local development without a keystore.
-            signingConfig = if (keyPropertiesFile.exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
+            // ── Signing ───────────────────────────────────────────────────
+            // Fail loudly if key.properties is missing so we never
+            // accidentally publish a debug-signed binary to the Play Store.
+            if (!keyPropertiesFile.exists()) {
+                error(
+                    "Release build requires android/key.properties. " +
+                    "Create the file with storeFile, storePassword, " +
+                    "keyAlias, and keyPassword entries."
+                )
             }
+            signingConfig = signingConfigs.getByName("release")
 
-            // R8 shrinking & obfuscation — required for Play Store compliance.
+            // ── R8 shrinking & obfuscation ────────────────────────────────
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
