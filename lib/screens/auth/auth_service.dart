@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+﻿import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 ValueNotifier<AuthService> authService = ValueNotifier(AuthService());
@@ -48,30 +48,46 @@ class AuthService {
     }
   }
 
+  /// Reauthenticates with [password] then permanently deletes the account.
+  ///
+  /// Throws [StateError] if no user is signed in or if the account has no
+  /// email address (e.g. anonymous accounts), allowing callers to show a
+  /// safe error dialog without exposing internal Firebase details.
   Future<void> deleteaccount(String password) async {
-    try {
-      final credential = EmailAuthProvider.credential(
-        email: currentUser!.email!,
-        password: password,
-      );
-      await currentUser!.reauthenticateWithCredential(credential);
-      await currentUser!.delete();
-    } catch (e) {
-      rethrow;
+    final user = currentUser;
+    if (user == null) {
+      throw StateError('deleteaccount: no authenticated user.');
     }
+    final email = user.email;
+    if (email == null || email.isEmpty) {
+      throw StateError('deleteaccount: user has no email address.');
+    }
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+    await user.reauthenticateWithCredential(credential);
+    await user.delete();
   }
 
+  /// Re-authenticates with [currentPassword] then updates to [newPassword].
+  ///
+  /// Throws [StateError] if no user is signed in or if the account has no
+  /// email address, preventing force-unwrap crashes.
   Future<void> resetPasswordFromCurrentPassword(
     String email,
     String currentPassword,
     String newPassword,
   ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw StateError('resetPasswordFromCurrentPassword: no authenticated user.');
+    }
     final credential = EmailAuthProvider.credential(
       email: email,
       password: currentPassword,
     );
-    await FirebaseAuth.instance.currentUser!
-        .reauthenticateWithCredential(credential);
-    await currentUser!.updatePassword(newPassword);
+    await user.reauthenticateWithCredential(credential);
+    await user.updatePassword(newPassword);
   }
 }

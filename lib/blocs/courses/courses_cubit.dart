@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../constants/app_strings.dart';
 import '../../models/course_model.dart';
 import '../../repositories/courses_repository.dart';
 
@@ -24,8 +26,9 @@ class CoursesCubit extends Cubit<CoursesState> {
     try {
       final courses = await _repository.getCoursesByGrade(grade);
       emit(CoursesLoaded(courses: courses, grade: grade));
-    } catch (e) {
-      emit(CoursesError(e.toString()));
+    } catch (e, st) {
+      debugPrint('[CoursesCubit] loadCoursesByGrade error: $e\n$st');
+      emit(const CoursesError(AppStrings.errorOccurred));
     }
   }
 }
